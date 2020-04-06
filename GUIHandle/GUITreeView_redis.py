@@ -10,12 +10,11 @@
 
 from PyQt5.QtWidgets import QTreeView, QAbstractItemView
 from GUIHandle.communicate import bus
-from PyQt5.QtCore import pyqtSignal
 
 from modules.redis_model import RedisTreeModel
 from global_config import mapServer
-from redis_connection import RedisConneciton
-from redis_operator_base import RedisOperatorBase
+from operator_factory import OperatorFactory
+from redis_connection_base import RedisConnectionBase
 
 class RedisTreeView(QTreeView):
     # clientItem = pyqtSignal
@@ -31,6 +30,9 @@ class RedisTreeView(QTreeView):
         self.setDragDropMode(QAbstractItemView.InternalMove)
         self.model_ = RedisTreeModel()
 
+        self.initSingle()
+
+    def initSingle(self):
         # init single
         self.clicked.connect(self.clikedTreeItem)
         bus.createServerItem.connect(self.createServerItem)
@@ -44,7 +46,7 @@ class RedisTreeView(QTreeView):
         self.model_.setupData({'name': serve_name, 'type': 'server', 'config': conf, 'status': 0})  ###
         self.setModel(self.model_)
 
-    def createDB(self,item):
+    def createDB(self, item):
         item.changeItemStatus(1)
         self.model_.setupData({'name': 'db0', 'type': 'db', 'count': len(self.keys_data)}, item=item)
 
@@ -57,33 +59,38 @@ class RedisTreeView(QTreeView):
             conf = item.itemConfig()
             if self.connServer(conf):
                 # create DB Item
-                self.model_.setupData({'name': 'db0', 'type': 'db', 'config': conf, 'status': 0, 'count': len(self.keys_data)}, item=item)
+                self.model_.setupData(
+                    {'name': 'db0', 'type': 'db', 'config': conf, 'status': 0, 'count': len(self.keys_data)}, item=item)
                 item.changeItemStatus(1)
                 self.setExpanded(index, True)
             else:
                 item.changeItemStatus(0)
 
-
         if item.itemType() == 'db':
             # create Keys Item
-            self.model_.setupData({'name': 'db0', 'type': 'keys', 'config': item.itemConfig(), 'data': self.keys_data}, item=item)
+            self.model_.setupData(
+                {'name': 'db0', 'type': 'keys', 'config': item.itemConfig(), 'data': self.keys_data}, item=item)
             self.setExpanded(index, True)
 
         if item.itemType() == 'key':
             # create value container
             bus.clickedKeyItem.emit(item.itemData)
 
-
     def connServer(self, conf):
-        redis_conn = RedisConneciton(conf['config'])
+        redis_pool = RedisConnectionBase(conf['config'])
+        conn = redis_pool.get_conn()
+        if conn is None:
+            print('conneciton error')
+            return False
+
+        factory = OperatorFactory(conn)
+
+        opera = factory.createOperator('redis')
 
         try:
-            self.keys_data = redis_conn.scan()
-            mapServer[conf['name']] = redis_conn
+            self.keys_data = opera.scan()
+            mapServer[conf['name']] = conn
             return True
         except Exception as e:
             print(e)
             return False
-
-
-

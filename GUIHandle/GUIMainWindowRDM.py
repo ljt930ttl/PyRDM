@@ -62,6 +62,10 @@ class MainWindowRDM(QMainWindow, Ui_MainWindow_PyRDM):
 
         self.toolbar = self.addToolBar('Connection Redis Server')
         self.toolbar.addAction(connAct)
+        connTest = QAction('test', self)
+        connTest.setShortcut('Ctrl+Z')
+        self.toolbar.addAction(connTest)
+        connTest.triggered.connect(self.tabWidgetContainer.initKeyContainer)
         connAct.triggered.connect(self.showConnectionDialog)
 
     def __signal_init(self):

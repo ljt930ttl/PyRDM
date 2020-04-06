@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_Diaog_connection.ui'
+# Form implementation generated from reading ui file 'ui_Dialog_connection.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -84,6 +84,7 @@ class Ui_DialogConnection(object):
         DialogConnection.setWindowTitle(_translate("DialogConnection", "Dialog"))
         self.label.setText(_translate("DialogConnection", "Name:"))
         self.label_2.setText(_translate("DialogConnection", "Host:"))
+        self.lineEdit_host.setText(_translate("DialogConnection", "127.0.0.1"))
         self.label_4.setText(_translate("DialogConnection", "Port:"))
         self.label_3.setText(_translate("DialogConnection", "Auth:"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("DialogConnection", "Connection"))
