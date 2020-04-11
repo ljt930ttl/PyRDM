@@ -10,9 +10,8 @@
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-from modules.items.redis_item import RedisItem, ServerItem, DBItem
-from modules.utils.chars_split import RedisNamespaceSplit
-
+from modules.items.redis_item import RedisItem, ServerItem, DBItem, NamespaceItem, KeyItem
+from utils.chars_proc import RedisNamespaceSplit
 
 class TreeModel(QtCore.QAbstractItemModel):
     def __init__(self, parent=None):
@@ -58,6 +57,10 @@ class TreeModel(QtCore.QAbstractItemModel):
             return True
         return False
 
+    # def dataChanged(self, QModelIndex, QModelIndex_1, roles, p_int=None, *args, **kwargs):
+    #     print(QModelIndex, QModelIndex_1, roles)
+    #     print(p_int=None, *args, **kwargs)
+
     def flags(self, index):
         # if not index.isValid():
         #     return QtCore.Qt.NoItemFlags
@@ -66,7 +69,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return QtCore.Qt.ItemIsEnabled
         ###QtCore.Qt.ItemIsEditable #可编辑
-        return  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+        return  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.DragMoveCursor
 
     def headerData(self, section, orientation, role=None):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
@@ -141,8 +144,11 @@ class RedisTreeModel(TreeModel):
             _item = self.rootItem.mapItems.get(data['name'], None)
             if _item is None:
                 server_item = ServerItem(self.__createItemData(**data), self.rootItem)
+                self.insertRow(server_item.row())
                 self.rootItem.appendChild(server_item)
                 self.rootItem.mapItems[data['name']] = server_item
+                # index = self.getIndexFromItem(server_item)
+                # self.setData(index, self.__createItemData(**data))
             else:
                 ## 不允许重名服务
                 return
@@ -161,9 +167,15 @@ class RedisTreeModel(TreeModel):
         if data.get('type', None) == 'server':
             _item = self.rootItem.mapItems.get(data['name'], None)
             if _item is None:
-                server_item = ServerItem(self.__createItemData(**data), self.rootItem)
+                server_item = ServerItem(parent=self.rootItem)
+
                 self.rootItem.appendChild(server_item)
                 self.rootItem.mapItems[data['name']] = server_item
+                index = self.getIndexFromItem(server_item)
+                self.setData(index,self.__createItemData(**data) )
+
+                return server_item
+                # print('xx')
             else:
                 ## 不允许重名服务
                 return
@@ -192,6 +204,7 @@ class RedisTreeModel(TreeModel):
             raise TypeError('data type error')
 
 
+
     def _renderLazily(self,parent_item, full_name, remainder_name):
         # print("name:%s in level:%d"%(full_name,level))
         name_list = RedisNamespaceSplit.split_namespace(remainder_name)
@@ -206,21 +219,32 @@ class RedisTreeModel(TreeModel):
                 node_name = full_name
                 remainder_name = ""
                 type_ = "key"
-        # if node_name == "run":
+        # if node_name == "test":
         #     print(node_name)
+
+            # map_obj = parent_item.mapItems
 
         _item = parent_item.mapItems.get(node_name, None)
         # _item = self.getItemFromNode(node_level)
+        child_item = None
+        if _item is not None:
+            if  _item.itemData['type'] == type_:
+                child_item = _item ##
 
-        if _item is None:
+        if child_item is None:
             # _node =  {'name': node_name, 'count': count}
-            child_item = RedisItem(self.__createItemData(name=node_name, type=type_, config=self.data['config']), parent_item)
+            if type_ == 'namespace':
+                child_item = NamespaceItem(
+                    self.__createItemData(name=node_name, type=type_, config=self.data['config']), parent_item)
+            else:
+                child_item = KeyItem(
+                    self.__createItemData(name=node_name, type=type_, config=self.data['config']), parent_item)
+
             parent_item.appendChild(child_item)
             # _index = self.getIndexFromItem(new_item)
-            parent_item.mapItems[node_name] = child_item # 利用字典，存储node与item的对应关系
+            parent_item.mapItems[node_name] = child_item  # 利用字典，存储node与item的对应关系
             # self.namespace_map[node_level] = self.getIndexFromItem(child_item) #利用 TreeItem 存储，查找index会非常慢
-        else:
-            child_item = _item ##
+
 
         if remainder_name == "":
             return

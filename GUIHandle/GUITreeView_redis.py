@@ -16,6 +16,7 @@ from global_config import mapServer
 from operator_factory import OperatorFactory
 from redis_connection_base import RedisConnectionBase
 
+
 class RedisTreeView(QTreeView):
     # clientItem = pyqtSignal
 
@@ -25,11 +26,11 @@ class RedisTreeView(QTreeView):
         self.keys_data = None
 
         self.setHeaderHidden(True)
-        self.setItemsExpandable(True)
+        # self.setItemsExpandable(False)
         self.resizeColumnToContents(0)
         self.setDragDropMode(QAbstractItemView.InternalMove)
         self.model_ = RedisTreeModel()
-
+        self.setModel(self.model_)
         self.initSingle()
 
     def initSingle(self):
@@ -37,18 +38,21 @@ class RedisTreeView(QTreeView):
         self.clicked.connect(self.clikedTreeItem)
         bus.createServerItem.connect(self.createServerItem)
 
-    def createServerItem(self, conf):
+    def createServerItem(self, config):
         # print(arg)
-        serve_name = conf.get('name', None)
+        serve_name = config.get('name', None)
         if serve_name is None:
             return
+        item = self.model_.setupData({'name': serve_name, 'type': 'server', 'config': config, 'status': 0})  #
+        self.isExpanded(self.model_.getIndexFromItem(item))
+        self.reset()
+        # self.expandToDepth(1)
+        # self.setExpanded(self.rootIndex(), False)
+        # index = self.model_.getIndexFromItem(item)
+        # self.commitData(item)
 
-        self.model_.setupData({'name': serve_name, 'type': 'server', 'config': conf, 'status': 0})  ###
-        self.setModel(self.model_)
-
-    def createDB(self, item):
-        item.changeItemStatus(1)
-        self.model_.setupData({'name': 'db0', 'type': 'db', 'count': len(self.keys_data)}, item=item)
+        mapServer[config['name']] = ""
+        # self.setExpanded(self.model_.getIndexFromItem(self.model_.rootItem),True)
 
     def clikedTreeItem(self, index):
         # print(index)
@@ -66,11 +70,12 @@ class RedisTreeView(QTreeView):
             else:
                 item.changeItemStatus(0)
 
-        if item.itemType() == 'db':
+        if item.itemType() == 'db' and item.itemStatus() == 0:
             # create Keys Item
             self.model_.setupData(
                 {'name': 'db0', 'type': 'keys', 'config': item.itemConfig(), 'data': self.keys_data}, item=item)
             self.setExpanded(index, True)
+            item.changeItemStatus(1)
 
         if item.itemType() == 'key':
             # create value container

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
+import json
 class ldata_split:
     def __init__(self, line):
         self.line = line
@@ -31,3 +31,36 @@ class RedisNamespaceSplit:
             return None
         name_list = namespace.split(separator, 1)
         return name_list
+
+class CodingChar:
+    @staticmethod
+    def codingString(value):
+        try:
+            new_value = value.decode()
+            str_type = 'unicode'
+        except Exception as e:
+            # print(e)
+            sp_value = str(value).split('\'')
+            new_value = sp_value[1]
+            str_type = 'binary'
+
+        return (new_value, str_type)
+
+    @staticmethod
+    def recoverCodeing(value , type_):
+        if value is None:
+            return
+        if type_ == 'binary':
+            value_e = eval(repr(value).replace('\\\\', '\\'))
+            new_value = value_e.encode()
+        else:
+            new_value = value
+        return new_value
+
+
+def formatJsonLoad(value):
+    try:
+        loads = json.loads(value)
+        return json.dumps(loads, sort_keys=True, indent=4)
+    except:
+        return value

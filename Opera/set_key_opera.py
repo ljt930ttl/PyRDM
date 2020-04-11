@@ -39,15 +39,6 @@ class SetOpera(AbstractOpera):
     def delRow(self, key, value):
         return self.connection.srem(key, value)
 
-
-    def updateValue(self, key, value):
-        # set 先删除后添加，即是修改
-        if self.connection is None:
-            return None
-        self.delRow(key, value)
-        return self.addData(key, value)
-
-
     # other
     def smembers(self, key):
         return self.connection.smembers(key)

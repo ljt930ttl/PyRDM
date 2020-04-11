@@ -36,8 +36,6 @@ class HashOpera(AbstractOpera):
     def delRow(self, key, field):
         return self.connection.hdel(key, field)
 
-    def updateValue(self, key, field, value):
-        return self.addData(key, field, value)
 
     ### return list other getData
     def hgetall(self, key):

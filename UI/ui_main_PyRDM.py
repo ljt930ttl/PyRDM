@@ -63,4 +63,4 @@ class Ui_MainWindow_PyRDM(object):
 
     def retranslateUi(self, MainWindow_PyRDM):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow_PyRDM.setWindowTitle(_translate("MainWindow_PyRDM", "MainWindow"))
+        MainWindow_PyRDM.setWindowTitle(_translate("MainWindow_PyRDM", "PyRDM"))

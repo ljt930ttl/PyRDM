@@ -12,70 +12,88 @@ from GUIHandle.container.GUIQWidget_container_base import KeyContainerBase
 
 
 class HashKeyContainer(KeyContainerBase):
-    def __init__(self, key_name, values, type_):
-        super(HashKeyContainer, self).__init__(key_name, values, type_)
-        self.setupUi(self)
+    def __init__(self, key_name, values, TTL,opera):
+        super(HashKeyContainer, self).__init__(key_name, values, TTL,opera)
+        # self.setupUi(self)
         self.field = None
-        self.tableHeard = ['key', 'value']
+        self.tableHeaders = ['key', 'value']
+        self.type_ = 'hash'
+        self.label_keyName = 'Key:'
+
+
 
         self.initData()
 
     def initData(self):
         fields = self.values.keys()
         self.setTitle(self.type_, self.key_name, fields)
-        self.createTable(fields)
+        self.initDisplayArea()
         self.tableWidget_values.doubleClicked.connect(self.displayValue)
 
-    def setTitle(self, type_, key_name, fields):
-        text_ = type_.upper() + ":"
-        self.label_keyType.setText(text_)
-        self.lineEdit_keyTitle.setText(key_name)
-        self.label_fieldCount.setText(str(len(fields)))
+
+    def initDisplayArea(self):
+        self.createTable(self.values)
+        self.textEdit_key.setEnabled(False)
+        self.textEdit_value.setEnabled(False)
 
     def createTable(self, fields):
         self.tableWidget_values.setColumnCount(2)
         self.tableWidget_values.setRowCount(len(fields))
-        self.tableWidget_values.setHorizontalHeaderLabels(self.tableHeard)
+        self.tableWidget_values.setHorizontalHeaderLabels(self.tableHeaders)
         self.tableWidget_values.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tableWidget_values.setSelectionBehavior(QTableWidget.SelectRows)  # 整行选中的方式
         self.tableWidget_values.horizontalHeader().setStretchLastSection(True)
-        # self.tableWidget_keys.resizeColumnsToContents()  # 将列调整到跟内容大小相匹配
-        # self.tableWidget_keys.resizeRowsToContents()  # 将行大小调整到跟内容的大学相匹配
-        self.setTableData(fields)
-
-    def setTableData(self, fields):
         r = 0
         for key in fields:
             newItem = QTableWidgetItem(key.decode())
             self.tableWidget_values.setItem(r, 0, newItem)
-            newItem = QTableWidgetItem(self.result[key].decode())
+            value = self.values[key].decode()
+            if len(self.values[key].decode()) > 1000:
+                value = "....."
+            newItem = QTableWidgetItem(value)
             self.tableWidget_values.setItem(r, 1, newItem)
             r += 1
 
+    def getTableValue(self, row):
+        # return self.tableWidget_values.item(row, 1).text()  # ##
+        field = self.tableWidget_values.item(row, 0).text().encode()
+        return self.values[field].decode()
+
     def displayField(self, row):
-        self.field = self.__getTableField(row)  # 需要保持，方便后面判断
+        self.field = self.getTableField(row)  # 需要保持，方便后面判断
         self.textEdit_key.setText(self.field)
+        self.label_feild.setText(self.label_keyName)
         self.label_fieldSize.setText(str(len(self.field)))
 
-    def displayValue(self):
-        row = self.tableWidget_values.currentRow()
-        value = self.__getTableValue(row)  # ##
-        self.textEdit_value.setText(value)
-        self.label_valusSize.setText(str(len(value)))
+        self.textEdit_key.setEnabled(True)
 
-        self.displayField(row)
-
-    def __getTableValue(self, row):
-        return self.tableWidget_values.item(row, 0).text()  # ##
-
-    def __getTableField(self, row):
-        return self.tableWidget_values.item(row, 1).text()
+    def getTableField(self, row):
+        return self.tableWidget_values.item(row, 0).text()
 
     def updateValue(self):
-        key_ = self.lineEdit_keyTitle.text()
+        # key_ = self.lineEdit_keyTitle.text()
         new_value = self.textEdit_value.toPlainText()
         new_field = self.textEdit_key.toPlainText()
         if new_field != self.field:
-            self.opera.delData(key_, self.field)
+            self.opera.delRow(self.key_name, self.field)
 
-        self.opera.update(key_, new_field, new_value)
+        ret = self.opera.addData(self.key_name, new_field, new_value)
+
+        if ret ==1:
+            self.tableWidget_values.item(self.currentRow, 0).setText(new_field)
+            self.tableWidget_values.item(self.currentRow, 1).setText(new_value)
+
+    def addRowData(self, data):
+        if self.type_ == data.get('type', None):
+            field =  data.get('field', None)
+            value = data.get('value', None)
+            self.opera.addData(self.key_name, field, value)
+            self.reloadValue()
+    # def deleteRow(self):
+    #     try:
+    #         row = self.tableWidget_values.currentRow()
+    #     except:
+    #         return
+    #     field = self.tableWidget_values.item(row, 0).text()
+    #
+    #     self.opera.delRow(self.key_name,field)

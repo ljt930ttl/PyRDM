@@ -6,30 +6,40 @@
 @file: GUIQwidget_ZSetKey.py
 @time: 2020/4/6 10:56
 '''
-from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget
+from PyQt5.QtWidgets import QTableWidgetItem,QTableWidget,QLineEdit
 from GUIHandle.container.GUIQWidget_container_base import KeyContainerBase
 
 
 class ZSetKeyContainer(KeyContainerBase):
-    def __init__(self, key_name, values, type_):
-        super().__init__(key_name, values, type_)
-        self.setupUi(self)
+    def __init__(self, key_name, values, TTL, opera):
+        super().__init__(key_name, values, TTL, opera)
 
         # self.key_name = key_name
         # self.values = values
-        # self.type_ = type_
+        self.type_ = 'zset'
 
         self.tableHeaders = ['value', 'source']
+        self.label_keyName = 'Source:'
         self.initData()
 
     def initData(self):
         # fields = self.values
 
         self.setTitle(self.type_, self.key_name, self.values)
-        self.createTable(self.values)
+        self.initDisplayArea()
 
         self.tableWidget_values.doubleClicked.connect(self.displayValue)
         # self.displayValue()
+
+    def initDisplayArea(self):
+        self.createTable(self.values)
+        self.textEdit_key.setEnabled(False)
+        self.textEdit_value.setEnabled(False)
+
+        self.lineEdit_key = QLineEdit()
+        self.lineEdit_key.setEnabled(False)
+        self.verticalLayout_field.addWidget(self.lineEdit_key)
+        self.textEdit_key.hide()
 
     def createTable(self, fields):
         self.tableWidget_values.setColumnCount(2)
@@ -38,53 +48,52 @@ class ZSetKeyContainer(KeyContainerBase):
         self.tableWidget_values.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tableWidget_values.setSelectionBehavior(QTableWidget.SelectRows)  # 整行选中的方式
         self.tableWidget_values.horizontalHeader().setStretchLastSection(True)
-        # self.tableWidget_keys.resizeColumnsToContents()  # 将列调整到跟内容大小相匹配
-        # self.tableWidget_keys.resizeRowsToContents()  # 将行大小调整到跟内容的大学相匹配
 
-        self.setTableData(fields)
-
-    def setTableData(self, value):
         r = 0
-        for value, source in value:
+        for value, source in fields:
             newItem = QTableWidgetItem(value.decode())
             self.tableWidget_values.setItem(r, 0, newItem)
             newItem = QTableWidgetItem(str(source))
             self.tableWidget_values.setItem(r, 1, newItem)
             r += 1
 
-    def setTitle(self, type_, key_name, values):
-        text_ = type_.upper() + ":"
-        self.label_keyType.setText(text_)
-        self.lineEdit_keyTitle.setText(key_name)
-        self.label_fieldCount.setText(str(len(values)))
-
-    def displayField(self, row):
-        source = self.__getTableField(row)
-        self.textEdit_key.setText(source)
-        # self.label_fieldSize.setText(str(len(source)))
-
-    def displayValue(self):
-        row = self.tableWidget_values.currentRow()
-        value = self.__getTableValue(row)  # ##
-        self.textEdit_value.setText(value)
-        self.label_valusSize.setText(str(len(value)))
-
-        self.displayField(row)
-
-    def __getTableValue(self, row):
+    def getTableValue(self, row):
         return self.tableWidget_values.item(row, 0).text()  # ##
 
-    def __getTableField(self, row):
+    def displayField(self, row):
+        source = self.getTableField(row)
+
+        # self.lineEdit_key = QLineEdit(self.widget_View_Field)
+        self.lineEdit_key.setText(source)
+        self.label_feild.setText(self.label_keyName)
+        self.lineEdit_key.setEnabled(True)
+
+    def getTableField(self, row):
         return self.tableWidget_values.item(row, 1).text()
 
-    def __getNewData(self):
-        new_value = self.textEdit_value.toPlainText()
-        new_field = self.textEdit_key.toPlainText()
-        return new_value, new_field
-
+    #  ##
     def updateValue(self):
-        new_value, new_field = self.__getNewData()
-        if new_field != self.field:
-            self.opera.delData(self.key_name, self.field)
+        new_value = self.textEdit_value.toPlainText()
+        new_field = self.lineEdit_key.text()
+        try:
+            source = float(new_field)
+        except:
+            print('error')
+            return
+        # if new_field != self.field:
+        #     self.opera.delData(self.key_name, self.field)
+        ret = self.opera.delRow(self.key_name, self.value)
+        print(ret)
+        ret = self.opera.addData(self.key_name, source, new_value)
 
-        self.opera.update(self.key_name, new_field, new_value)
+        print(ret)
+
+        self.tableWidget_values.item(self.currentRow, 0).setText(new_value)
+        self.tableWidget_values.item(self.currentRow, 1).setText(new_field)
+
+    def addRowData(self, data):
+        if self.type_ == data.get('type', None):
+            source =  data.get('field', None)
+            new_value = data.get('value', None)
+            self.opera.addData(self.key_name, source, new_value)
+            self.reloadValue()

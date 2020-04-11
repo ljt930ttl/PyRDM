@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_Dialog_connection.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -67,12 +67,12 @@ class Ui_DialogConnection(object):
         self.horizontalLayout.addWidget(self.pushButton_testconnection)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushButton_ok = QtWidgets.QPushButton(DialogConnection)
-        self.pushButton_ok.setObjectName("pushButton_ok")
-        self.horizontalLayout.addWidget(self.pushButton_ok)
         self.pushButton_cancel = QtWidgets.QPushButton(DialogConnection)
         self.pushButton_cancel.setObjectName("pushButton_cancel")
         self.horizontalLayout.addWidget(self.pushButton_cancel)
+        self.pushButton_ok = QtWidgets.QPushButton(DialogConnection)
+        self.pushButton_ok.setObjectName("pushButton_ok")
+        self.horizontalLayout.addWidget(self.pushButton_ok)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
 
         self.retranslateUi(DialogConnection)
@@ -89,5 +89,5 @@ class Ui_DialogConnection(object):
         self.label_3.setText(_translate("DialogConnection", "Auth:"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("DialogConnection", "Connection"))
         self.pushButton_testconnection.setText(_translate("DialogConnection", "Test Connection"))
-        self.pushButton_ok.setText(_translate("DialogConnection", "OK"))
         self.pushButton_cancel.setText(_translate("DialogConnection", "Cancel"))
+        self.pushButton_ok.setText(_translate("DialogConnection", "OK"))

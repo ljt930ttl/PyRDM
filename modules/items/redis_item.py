@@ -26,19 +26,7 @@ class RedisItem(TreeItem):
         self.mapItems[node] = item
 
     def data(self, column):
-        try:
-            # return (self.getItemName(),self.getItemId(),self.getItemUid(),self.getItemCode())[column]
-            # name = self.itemData.get('name', 0)
-            type_ = self.itemType()
-            if type_ == 'key':
-                value = self.itemName()
-            elif type_ == 'namespace':
-                value = "%s (%d)" % (self.itemName(), self.childItemsCount())
-            else:
-                value = ""
-            return value
-        except IndexError:
-            return None
+        return None
 
     def childItemsCount(self):
         count = 0
@@ -87,3 +75,28 @@ class DBItem(RedisItem):
     ## db
     def keysCount(self):
         return self.itemData.get('count', 0)
+
+    def itemStatus(self):
+        return self.itemData.get('status', -1)
+
+    def changeItemStatus(self, status):
+        if self.itemData.get('status', -1) == -1:
+            print("error")
+        else:
+            self.itemData['status'] = status
+
+class NamespaceItem(RedisItem):
+    def data(self, column):
+        try:
+            value = "%s (%d)" % (self.itemName(), self.childItemsCount())
+            return  value
+        except IndexError:
+            return None
+
+class KeyItem(RedisItem):
+    def data(self, column):
+        try:
+            return self.itemName()
+        except IndexError:
+            return None
+

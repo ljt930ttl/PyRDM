@@ -12,23 +12,19 @@ import redis
 
 
 class RedisConnectionBase(object):
-    __pool__ = None
 
     def __init__(self, arg=None):
         if arg is None:
             arg = {"host": "127.0.0.1", "port": 6379}
         self.arg = arg
-        pool = RedisConnectionBase.get_pool(arg)
-        print(pool)
-        self.redis_conn = redis.StrictRedis(connection_pool=pool, socket_timeout=500)
+        self.pool = self.get_pool(arg)
+        self.redis_conn = redis.StrictRedis(connection_pool=self.pool, socket_timeout=500)
 
-    @staticmethod
-    def get_pool(arg):
-        __pool = None
-        if RedisConnectionBase.__pool__ is None:
-            RedisConnectionBase.__pool__ = redis.ConnectionPool(**arg, max_connections=10)
+    def get_pool(self, arg):
+        # if self.pool is None:
+        #     self.pool = redis.ConnectionPool(**arg, max_connections=10)
 
-        return RedisConnectionBase.__pool__
+        return redis.ConnectionPool(**arg, max_connections=10)
 
     def __check_conn(self):
         """

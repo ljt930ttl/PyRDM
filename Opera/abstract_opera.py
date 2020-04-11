@@ -21,7 +21,10 @@ class AbstractOpera(object):
         return self.connection.save()
 
     def getKeyTTL(self, key):
-        pass
+        return self.connection.ttl(key)
+
+    def setTTL(self,key, time):
+        return self.connection.expire(key, time)
 
     def getType(self, key=None):
         if self.opera_type is None and key is not None:

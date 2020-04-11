@@ -13,10 +13,10 @@ from PyQt5.QtWidgets import QApplication, QMainWindow,QAction
 
 from UI.ui_main_PyRDM import Ui_MainWindow_PyRDM
 from GUIHandle.GUITreeView_redis import RedisTreeView
-from GUIHandle.GUIForm_container import FormContainer
-from GUIHandle.GUIForm_control import FormControl
+from GUIHandle.GUITabWidget_Key import TabKeyContainer
+from GUIHandle.GUITabWidget_S import FormControl
 from GUIHandle.GUIDialog_connection import DiaogConneciton
-from GUIHandle.communicate import bus
+
 
 import global_config as g_config
 
@@ -37,7 +37,7 @@ class MainWindowRDM(QMainWindow, Ui_MainWindow_PyRDM):
     def widgets_init(self):
 
         # 初始化显示 redis value相关tab部件
-        self.tabWidgetContainer = FormContainer()
+        self.tabWidgetContainer = TabKeyContainer()
         self.verticalLayout_container.addWidget(self.tabWidgetContainer)
         self.tabWidgetContainer.show()
 
@@ -65,7 +65,7 @@ class MainWindowRDM(QMainWindow, Ui_MainWindow_PyRDM):
         connTest = QAction('test', self)
         connTest.setShortcut('Ctrl+Z')
         self.toolbar.addAction(connTest)
-        connTest.triggered.connect(self.tabWidgetContainer.initKeyContainer)
+        # connTest.triggered.connect(self.tabWidgetContainer.initKeyContainer)
         connAct.triggered.connect(self.showConnectionDialog)
 
     def __signal_init(self):
@@ -79,9 +79,6 @@ class MainWindowRDM(QMainWindow, Ui_MainWindow_PyRDM):
         dialog_conn.exec_()
         # rInfo = dialog_conn.sendredisConnInfo()
         dialog_conn.destroy()
-        bus.createServerItem.emit(g_config.rdm_config)
-
-
 
 
 

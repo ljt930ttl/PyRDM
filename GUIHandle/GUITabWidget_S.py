@@ -4,7 +4,7 @@
 """
 @Time :   2020/4/2 14:16
 @Author:  linjinting
-@File: GUIForm_control.py
+@File: GUITabWidget_S.py
 @Software: PyCharm
 """
 from PyQt5.QtWidgets import QWidget

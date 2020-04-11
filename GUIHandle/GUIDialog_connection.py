@@ -11,6 +11,7 @@
 from PyQt5.QtWidgets import QDialog
 from UI.ui_Dialog_connection import Ui_DialogConnection
 import global_config as g_config
+from GUIHandle.communicate import bus
 
 class DiaogConneciton(QDialog, Ui_DialogConnection):
     def __init__(self):
@@ -33,6 +34,7 @@ class DiaogConneciton(QDialog, Ui_DialogConnection):
         g_config.redisConfig(name=m_name, host=m_host, port=m_port, password=m_auth)
         # self.rCI = redisConnInfo.redisConnInfo()
         # self.rCI.setdInfo(name=m_sname ,host=m_shost, port=m_iport, password=m_sauth)
+        bus.createServerItem.emit(g_config.rdm_config)
         self.close()
 
     def sendredisConnInfo(self):

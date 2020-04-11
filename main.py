@@ -11,11 +11,11 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from GUIHandle.GUIMainWindowRDM import MainWindowRDM
 
-# def main():
-#     app = QApplication(sys.argv)
-#     window = MainWindowRDM()
-#     window.show()
-#     sys.exit(app.exec_())
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindowRDM()
+    window.show()
+    sys.exit(app.exec_())
 
 
-# main()
+main()

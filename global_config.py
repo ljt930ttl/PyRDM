@@ -27,11 +27,11 @@ def redisConfig(name='127.0.0.1', host='127.0.0.1', port=6379,
         'host': host,
         'port': port,
     }
-    rdm_config.update({
-        'config': config,
-        'name': name,
-        'separator': separator
-    })
+
+    rdm_config.update({'separator': separator,
+        'name':name,
+        'config':config})
+
 
 
 if __name__ == '__main__':
